@@ -60,12 +60,32 @@ func (r *Repository) List(ctx context.Context) ([]Item, error) {
 // Update refreshes count and pricing so the admin can reflect sold or discounted goods quickly.
 func (r *Repository) Update(ctx context.Context, item Item) error {
 	query := "UPDATE inventory SET available_count = ?, price_cents = ?, baked_at = ? WHERE id = ?"
-	_, err := r.db.ExecContext(ctx, query, item.AvailableCount, item.PriceCents, item.BakedAt.UTC(), item.ID)
-	return err
+	result, err := r.db.ExecContext(ctx, query, item.AvailableCount, item.PriceCents, item.BakedAt.UTC(), item.ID)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // Delete removes a batch entirely which is handy once everything is sold out.
 func (r *Repository) Delete(ctx context.Context, id int64) error {
-	_, err := r.db.ExecContext(ctx, "DELETE FROM inventory WHERE id = ?", id)
-	return err
+	result, err := r.db.ExecContext(ctx, "DELETE FROM inventory WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }

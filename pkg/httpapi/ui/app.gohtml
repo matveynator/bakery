@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Белая Ромашка Пекарня</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Section: Embedded Styles keep everything in one file for Go embed -->
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+            background: #f8f4f1;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fff7ec, #ffe9d6);
+            color: #473525;
+        }
+        header {
+            padding: 2rem;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            margin: 0.4rem 0 0;
+            font-size: 1.1rem;
+        }
+        main {
+            display: grid;
+            gap: 2rem;
+            padding: 1rem;
+            max-width: 1100px;
+            margin: 0 auto 4rem;
+        }
+        section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            box-shadow: 0 20px 40px rgba(71, 53, 37, 0.1);
+            padding: 1.5rem;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .menu-card {
+            border-radius: 14px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 172, 64, 0.2);
+        }
+        .menu-card h3 {
+            margin: 0 0 0.5rem;
+        }
+        .menu-card p {
+            margin: 0 0 0.5rem;
+            font-size: 0.95rem;
+        }
+        .menu-card button {
+            align-self: flex-start;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: none;
+            background: #ff9f43;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .menu-card button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(255, 159, 67, 0.25);
+        }
+        form label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+        form input, form select {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(71, 53, 37, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .grid-two {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        .pill {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            margin: 0.15rem;
+            border-radius: 999px;
+            border: 1px solid rgba(71, 53, 37, 0.25);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .pill.selected {
+            background: #ff9f43;
+            color: #fff;
+            border-color: #ff9f43;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .stack {
+            display: grid;
+            gap: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(71, 53, 37, 0.1);
+        }
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .notice {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            background: rgba(74, 189, 172, 0.15);
+            color: #1f6f63;
+            font-weight: 600;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: rgba(71, 53, 37, 0.65);
+        }
+        @media (max-width: 640px) {
+            header h1 { font-size: 2rem; }
+            header p { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body data-page="{{.Page}}">
+    <header>
+        <h1>Белая Ромашка — Свежая пекарня</h1>
+        <p>{{.FreeDelivery}}</p>
+    </header>
+    <main>
+        <!-- Section: Customer Order Experience -->
+        <section id="customer" class="stack">
+            <h2>Утренние заказы жителей</h2>
+            <div class="notice">{{.CroissantBlurb}}</div>
+            <div class="menu-grid" id="menu"></div>
+            <form id="order-form" autocomplete="on">
+                <div class="grid-two">
+                    <div>
+                        <label for="name">Имя</label>
+                        <input id="name" name="name" required>
+                        <label for="phone">Телефон</label>
+                        <input id="phone" name="phone" placeholder="8-XXX-XXX-XX-XX" required>
+                        <label for="address">Адрес</label>
+                        <input id="address" name="address" placeholder="Белая Ромашка, дом" required>
+                    </div>
+                    <div>
+                        <label>Дни доставки хлеба</label>
+                        <div id="bread-days" class="days"></div>
+                        <label for="bread-frequency">Частота</label>
+                        <select id="bread-frequency" name="breadFrequency" required>
+                            <option value="">Выберите</option>
+                            <option value="everyday">Каждый день</option>
+                            <option value="alternate">Через день</option>
+                            <option value="weekend">Выходные</option>
+                        </select>
+                        <label for="bread-start">Дата начала</label>
+                        <input id="bread-start" name="breadStart" type="date" required>
+                        <label for="bread-notes">Комментарий</label>
+                        <input id="bread-notes" name="breadNotes" placeholder="Например, нужна нарезка">
+                    </div>
+                </div>
+                <div>
+                    <label>Расписание круассанов</label>
+                    <div id="croissant-plan" class="days"></div>
+                </div>
+                <button type="submit">Оформить заказ</button>
+                <div id="order-message" class="notice hidden"></div>
+            </form>
+        </section>
+        <!-- Section: Admin Inventory Console -->
+        <section id="admin" class="stack">
+            <h2>Панель пекаря</h2>
+            <div class="toolbar">
+                <button id="refresh-inventory" type="button">Обновить наличие</button>
+                <button id="new-batch" type="button">Добавить партию</button>
+            </div>
+            <div id="inventory-empty" class="notice hidden">Добавьте свежие изделия для отображения в меню</div>
+            <table id="inventory-table" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Категория</th>
+                        <th>Готовность</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+    <footer>С любовью испечено в Пятигорске</footer>
+    <!-- Section: Inline Scripts keep SPA responsive without external files -->
+    <script>
+    const pageKind = document.body.getAttribute('data-page');
+    const state = {
+        menu: {{.MenuJSON}},
+        croissantPlan: {},
+        breadDays: new Set(),
+        inventory: []
+    };
+
+    const weekdays = [
+        { key: 'monday', label: 'Понедельник' },
+        { key: 'tuesday', label: 'Вторник' },
+        { key: 'wednesday', label: 'Среда' },
+        { key: 'thursday', label: 'Четверг' },
+        { key: 'friday', label: 'Пятница' },
+        { key: 'saturday', label: 'Суббота' },
+        { key: 'sunday', label: 'Воскресенье' }
+    ];
+
+    function $(id) { return document.getElementById(id); }
+
+    function toggleSectionVisibility() {
+        $('customer').classList.toggle('hidden', pageKind === 'admin');
+        $('admin').classList.toggle('hidden', pageKind !== 'admin');
+    }
+
+    function renderMenu() {
+        const container = $('menu');
+        container.innerHTML = '';
+        state.menu.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'menu-card';
+            card.innerHTML = `
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <p><strong>${item.price}</strong></p>
+                <button type="button" data-name="${item.name}" data-category="${item.category}">Добавить</button>
+            `;
+            card.querySelector('button').addEventListener('click', () => addCroissantDay(item));
+            container.appendChild(card);
+        });
+    }
+
+    function renderDayPills(targetId, selectionSet, multiSelect = true) {
+        const target = $(targetId);
+        target.innerHTML = '';
+        weekdays.forEach(day => {
+            const pill = document.createElement('span');
+            const isSelected = selectionSet.has ? selectionSet.has(day.key) : Boolean(selectionSet[day.key]);
+            pill.className = 'pill' + (isSelected ? ' selected' : '');
+            pill.textContent = day.label;
+            pill.addEventListener('click', () => {
+                if (multiSelect) {
+                    if (selectionSet.has(day.key)) {
+                        selectionSet.delete(day.key);
+                        pill.classList.remove('selected');
+                    } else {
+                        selectionSet.add(day.key);
+                        pill.classList.add('selected');
+                    }
+                } else {
+                    if (selectionSet[day.key]) {
+                        delete selectionSet[day.key];
+                        pill.classList.remove('selected');
+                    } else {
+                        const amount = prompt('Сколько изделий к утру?');
+                        if (amount) {
+                            const parsed = parseInt(amount, 10);
+                            if (!Number.isNaN(parsed) && parsed > 0) {
+                                selectionSet[day.key] = parsed;
+                                pill.classList.add('selected');
+                            }
+                        }
+                    }
+                }
+            });
+            target.appendChild(pill);
+        });
+    }
+
+    function addCroissantDay(item) {
+        const day = prompt('Выберите день для ' + item.name + ' (например, вторник)');
+        if (!day) return;
+        const normalized = normalizeDay(day);
+        if (!normalized) {
+            alert('Не удалось распознать день. Попробуйте снова.');
+            return;
+        }
+        const amount = prompt('Количество для утра (' + item.name + ')');
+        if (!amount) return;
+        const parsed = parseInt(amount, 10);
+        if (Number.isNaN(parsed) || parsed <= 0) {
+            alert('Введите положительное число.');
+            return;
+        }
+        state.croissantPlan[normalized] = {
+            name: item.name,
+            quantity: parsed
+        };
+        renderCroissantPlan();
+    }
+
+    function normalizeDay(value) {
+        const lower = value.toLowerCase();
+        const match = weekdays.find(day => day.label.toLowerCase().startsWith(lower.slice(0, 3)) || day.key.startsWith(lower.slice(0, 3)));
+        return match ? match.key : '';
+    }
+
+    function renderCroissantPlan() {
+        const container = $('croissant-plan');
+        container.innerHTML = '';
+        Object.keys(state.croissantPlan).forEach(key => {
+            const pill = document.createElement('span');
+            pill.className = 'pill selected';
+            const plan = state.croissantPlan[key];
+            pill.textContent = `${labelForDay(key)} — ${plan.quantity} шт.`;
+            pill.addEventListener('click', () => {
+                delete state.croissantPlan[key];
+                renderCroissantPlan();
+            });
+            container.appendChild(pill);
+        });
+    }
+
+    function labelForDay(key) {
+        const entry = weekdays.find(day => day.key === key);
+        return entry ? entry.label : key;
+    }
+
+    function serializeOrderForm() {
+        const form = $('order-form');
+        const formData = new FormData(form);
+        const croissantSchedule = Object.keys(state.croissantPlan).map(day => ({
+            day: day,
+            quantity: state.croissantPlan[day].quantity,
+            item: state.croissantPlan[day].name
+        }));
+        const itemTotals = {};
+        croissantSchedule.forEach(slot => {
+            if (!itemTotals[slot.item]) {
+                itemTotals[slot.item] = 0;
+            }
+            itemTotals[slot.item] += slot.quantity;
+        });
+        const items = Object.keys(itemTotals).map(name => ({
+            name,
+            quantity: itemTotals[name]
+        }));
+        return {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            breadSchedule: {
+                frequency: formData.get('breadFrequency'),
+                days: Array.from(state.breadDays),
+                startDate: formData.get('breadStart'),
+                notes: formData.get('breadNotes') || ''
+            },
+            croissantSchedule,
+            comment: formData.get('breadNotes') || '',
+            items
+        };
+    }
+
+    function submitOrder(event) {
+        event.preventDefault();
+        const payload = serializeOrderForm();
+        fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(resp => resp.json().then(body => ({ status: resp.status, body }))).then(({ status, body }) => {
+            const message = $('order-message');
+            if (status >= 200 && status < 300) {
+                message.textContent = 'Спасибо! Заказ создан, мы свяжемся для подтверждения.';
+                message.classList.remove('hidden');
+                $('order-form').reset();
+                state.breadDays.clear();
+                state.croissantPlan = {};
+                renderDayPills('bread-days', state.breadDays, true);
+                renderCroissantPlan();
+            } else {
+                message.textContent = body.error || 'Не удалось оформить заказ';
+                message.classList.remove('hidden');
+            }
+        }).catch(() => {
+            const message = $('order-message');
+            message.textContent = 'Ошибка соединения. Попробуйте позже.';
+            message.classList.remove('hidden');
+        });
+    }
+
+    function setupAdmin() {
+        $('refresh-inventory').addEventListener('click', loadInventory);
+        $('new-batch').addEventListener('click', () => {
+            const name = prompt('Название изделия');
+            if (!name) return;
+            const category = prompt('Категория (bread, croissant, pastry)') || 'bread';
+            const bakedAt = prompt('Время выпечки (YYYY-MM-DD HH:MM)');
+            const price = prompt('Цена в рублях');
+            const quantity = prompt('Сколько готово к выдаче?');
+            const payload = { name, category, baked_at: bakedAt, price_rub: price, quantity: quantity };
+            fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => loadInventory());
+        });
+        loadInventory();
+    }
+
+    function loadInventory() {
+        fetch('/api/admin/inventory').then(resp => resp.json()).then(items => {
+            state.inventory = items;
+            renderInventory();
+            state.menu = items.map(it => ({
+                name: it.name,
+                description: `Свежая партия от ${it.baked_at}`,
+                price: it.price,
+                category: it.category
+            }));
+            renderMenu();
+        });
+    }
+
+    function renderInventory() {
+        const table = $('inventory-table');
+        const emptyState = $('inventory-empty');
+        const body = table.querySelector('tbody');
+        body.innerHTML = '';
+        if (!state.inventory.length) {
+            table.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
+        }
+        table.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        state.inventory.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.category}</td>
+                <td>${item.baked_at}</td>
+                <td>${item.price}</td>
+                <td>${item.quantity}</td>
+                <td><button type="button">Удалить</button></td>
+            `;
+            row.querySelector('button').addEventListener('click', () => deleteInventory(item.id));
+            body.appendChild(row);
+        });
+    }
+
+    function deleteInventory(id) {
+        fetch('/api/admin/inventory?id=' + encodeURIComponent(id), { method: 'DELETE' })
+            .then(() => loadInventory());
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleSectionVisibility();
+        renderMenu();
+        renderDayPills('bread-days', state.breadDays, true);
+        renderCroissantPlan();
+        if (pageKind !== 'admin') {
+            $('order-form').addEventListener('submit', submitOrder);
+        } else {
+            setupAdmin();
+        }
+    });
+    </script>
+</body>
+</html>

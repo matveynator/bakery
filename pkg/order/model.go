@@ -13,12 +13,14 @@ type BreadSchedule struct {
 	Days      []string `json:"days"`
 	Frequency string   `json:"frequency"`
 	StartDate string   `json:"start_date"`
+	Notes     string   `json:"notes"`
 }
 
 // CroissantSchedule lists the weekday and amount per drop so batching stays predictable.
 type CroissantSchedule struct {
 	Day      string `json:"day"`
 	Quantity int    `json:"quantity"`
+	Item     string `json:"item"`
 }
 
 // Order aggregates all information required to deliver bakery goods around the district.

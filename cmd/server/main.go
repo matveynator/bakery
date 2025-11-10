@@ -18,11 +18,11 @@ import (
 	"strconv"
 	"time"
 
-	"bakery/internal/httpserver"
-	"bakery/internal/inventory"
-	"bakery/internal/order"
-	"bakery/internal/storage/memorydriver"
-	"bakery/internal/version"
+	"bakery/pkg/httpapi"
+	"bakery/pkg/inventory"
+	"bakery/pkg/order"
+	"bakery/pkg/storage/memorydriver"
+	"bakery/pkg/version"
 )
 
 // main bootstraps the entire stack so both the public site and the admin can run together.
@@ -58,7 +58,7 @@ func main() {
 	inventoryService := inventory.NewService(inventoryRepo)
 	defer inventoryService.Close()
 
-	srv, err := httpserver.New(orderService, inventoryService)
+	srv, err := httpapi.New(orderService, inventoryService)
 	if err != nil {
 		log.Fatalf("unable to build http server: %v", err)
 	}
@@ -113,7 +113,7 @@ func parseFlags() appConfig {
 }
 
 // runDomainServers provisions TLS on the fly because production domains must default to HTTPS.
-func runDomainServers(domain string, srv *httpserver.Server) {
+func runDomainServers(domain string, srv *httpapi.Server) {
 	tlsCert, keyFile, certFile, err := generateCertificate(domain)
 	if err != nil {
 		log.Fatalf("unable to generate certificate: %v", err)
