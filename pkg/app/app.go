@@ -129,7 +129,7 @@ func parseFlags(args []string) (Config, error) {
 	var cfg Config
 	set.BoolVar(&cfg.showVersion, "version", false, "Show the application version")
 	set.StringVar(&cfg.domain, "domain", "", "Serve HTTPS on 80/443 via Let's Encrypt when a domain is provided.")
-	set.IntVar(&cfg.port, "port", 8765, "Port for running the HTTP server when not using -domain.")
+	set.IntVar(&cfg.port, "port", 7654, "Port for running the HTTP server when not using -domain.")
 	set.StringVar(&cfg.dbType, "db-type", "sqlite", "Database driver: chai, sqlite, duckdb, pgx (PostgreSQL), or clickhouse")
 	set.StringVar(&cfg.dbPath, "db-path", "", "Filesystem path for chai/sqlite/duckdb databases; defaults to the working directory.")
 

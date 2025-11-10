@@ -19,7 +19,7 @@ This wiki page captures the full scope of the bakery delivery platform, summariz
 
 ## Running Locally
 
-- `go run ./cmd/server` starts the HTTP server on port 8765 by default.
+- `go run ./cmd/server` starts the HTTP server on port 7654 by default.
 - Pass `-domain example.com` in production to enable automatic HTTPS bootstrapping.
 - The in-memory SQL driver persists data to `bakery.db` by default and requires no external services.
 
