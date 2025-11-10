@@ -1,0 +1,134 @@
+{{/* This template renders the complete landing page with embedded menu data. */}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Белая Ромашка — свежие круассаны и хлеб</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <section class="hero">
+        <h1>Свежая выпечка в Белой Ромашке</h1>
+        <p>{{.FreeDelivery}}</p>
+        <p class="hint">{{.CroissantBlurb}}</p>
+        <a class="admin-link" href="/admin">Админка пекаря</a>
+    </section>
+
+    <section class="menu">
+        <h2>Выберите любимые изделия</h2>
+        <div class="menu-grid">
+            {{range .Menu}}
+            <div class="menu-item" data-item="{{.Name}}" data-category="{{.Category}}">
+                <img src="{{.Image}}" alt="{{.Name}}">
+                <div class="content">
+                    <h3>{{.Name}}</h3>
+                    <p>{{.Description}}</p>
+                    <div class="price">{{.Price}}</div>
+                    <div class="controls">
+                        <button type="button" class="decrement">−</button>
+                        <span class="counter">0</span>
+                        <button type="button" class="increment">+</button>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <section class="order-panel">
+        <div class="summary">
+            <h2>Ваш заказ</h2>
+            <ul id="order-summary"></ul>
+            <div id="notification" class="notification"></div>
+            <p class="delivery-note">Доставка утром бесплатно по Белой Ромашке.</p>
+        </div>
+        <div class="form-wrapper">
+            <h2>Оформление доставки</h2>
+            <form id="order-form">
+                <div class="field-group">
+                    <label for="customer-name">Имя</label>
+                    <input id="customer-name" name="name" type="text" placeholder="Ваше имя" required>
+                </div>
+                <div class="field-group">
+                    <label for="customer-phone">Телефон</label>
+                    <input id="customer-phone" name="phone" type="tel" placeholder="Телефон" required>
+                </div>
+                <div class="field-group">
+                    <label for="customer-address">Адрес доставки</label>
+                    <input id="customer-address" name="address" type="text" placeholder="Улица, дом, подъезд" required>
+                </div>
+                <div class="field-group">
+                    <label for="bread-start">Когда начать доставку хлеба</label>
+                    <input id="bread-start" name="bread_start" type="date" required>
+                </div>
+                <div class="field-group">
+                    <label for="bread-frequency">Частота хлеба</label>
+                    <select id="bread-frequency" name="bread_frequency" required>
+                        <option value="">Выберите график</option>
+                        <option value="daily">Каждое утро</option>
+                        <option value="alternate">Через день</option>
+                        <option value="custom">Только выбранные дни</option>
+                    </select>
+                </div>
+                <fieldset class="field-group">
+                    <legend>Дни недели для хлеба</legend>
+                    <div class="weekday-grid" data-target="bread-days">
+                        <label><input type="checkbox" value="monday"> Пн</label>
+                        <label><input type="checkbox" value="tuesday"> Вт</label>
+                        <label><input type="checkbox" value="wednesday"> Ср</label>
+                        <label><input type="checkbox" value="thursday"> Чт</label>
+                        <label><input type="checkbox" value="friday"> Пт</label>
+                        <label><input type="checkbox" value="saturday"> Сб</label>
+                        <label><input type="checkbox" value="sunday"> Вс</label>
+                    </div>
+                </fieldset>
+                <fieldset class="field-group">
+                    <legend>Круассаны утром</legend>
+                    <p class="hint">Отметьте дни и количество свежих круассанов.</p>
+                    <div id="croissant-days" class="croissant-grid">
+                        <div class="croissant-row" data-day="monday">
+                            <label>Понедельник</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="tuesday">
+                            <label>Вторник</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="wednesday">
+                            <label>Среда</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="thursday">
+                            <label>Четверг</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="friday">
+                            <label>Пятница</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="saturday">
+                            <label>Суббота</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                        <div class="croissant-row" data-day="sunday">
+                            <label>Воскресенье</label>
+                            <input type="number" min="0" value="0">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="field-group">
+                    <label for="order-comment">Комментарий</label>
+                    <textarea id="order-comment" name="comment" rows="3" placeholder="Например: домофон 12"></textarea>
+                </div>
+                <button type="submit">Отправить заказ</button>
+            </form>
+        </div>
+    </section>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
