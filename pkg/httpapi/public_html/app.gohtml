@@ -4,226 +4,638 @@
     <meta charset="utf-8">
     <title>Белая Ромашка Пекарня</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Section: Embedded Styles keep everything in one file for Go embed -->
+    <!-- Layout comment: Embedding styles keeps the binary self-contained and mirrors the Masamadre order atmosphere. -->
     <style>
         :root {
             color-scheme: light;
-            font-family: 'Montserrat', 'Segoe UI', sans-serif;
-            background: #f8f4f1;
+            font-family: 'Manrope', 'Segoe UI', sans-serif;
+            background: #f7f0e7;
+            color: #2e2116;
         }
         body {
             margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #fff7ec, #ffe9d6);
-            color: #473525;
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, rgba(255, 203, 164, 0.25), transparent 55%),
+                        linear-gradient(180deg, #fff6ee 0%, #f7f0e7 40%, #f2e7db 100%);
+            color: #2e2116;
         }
-        header {
-            padding: 2rem;
-            text-align: center;
+        a {
+            color: inherit;
+            text-decoration: none;
         }
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
+        .page {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        header p {
-            margin: 0.4rem 0 0;
-            font-size: 1.1rem;
+        /* Hero comment: The hero mimics the Masamadre split hero with soft gradients and rounded containers. */
+        .hero {
+            position: relative;
+            padding: 2.75rem 1.5rem 6rem;
+            overflow: hidden;
         }
-        main {
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: -20% -10% auto;
+            height: 120%;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 217, 138, 0.45) 0%, rgba(255, 217, 138, 0) 55%),
+                        radial-gradient(circle at 90% 0%, rgba(255, 139, 96, 0.18) 0%, rgba(255, 139, 96, 0) 60%);
+            z-index: 0;
+        }
+        .hero__content {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2.5rem;
+        }
+        .hero__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .hero__logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .hero__nav {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .hero__contact {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+        .hero__contact span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.95rem;
+        }
+        .hero__body {
             display: grid;
             gap: 2rem;
-            padding: 1rem;
-            max-width: 1100px;
-            margin: 0 auto 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            align-items: center;
         }
-        section {
-            background: rgba(255, 255, 255, 0.8);
+        .hero__headline {
+            display: grid;
+            gap: 1.25rem;
+        }
+        .hero__headline h1 {
+            margin: 0;
+            font-size: clamp(2.6rem, 5vw, 3.6rem);
+            line-height: 1.1;
+            font-weight: 700;
+        }
+        .hero__headline p {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.55;
+            max-width: 32rem;
+        }
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.45rem 1.2rem;
+            border-radius: 999px;
+            background: rgba(255, 154, 86, 0.15);
+            color: #a24c1a;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .hero__card {
+            padding: 2rem;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 30px 60px rgba(161, 93, 33, 0.15);
+            display: grid;
+            gap: 1.1rem;
+        }
+        .hero__card h2 {
+            margin: 0;
+            font-size: 1.55rem;
+            font-weight: 700;
+        }
+        .hero__card p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .card-note {
+            padding: 0.8rem 1rem;
             border-radius: 18px;
-            box-shadow: 0 20px 40px rgba(71, 53, 37, 0.1);
-            padding: 1.5rem;
+            background: rgba(30, 101, 74, 0.08);
+            color: #1e654a;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
-        h2 {
-            margin-top: 0;
-            font-size: 1.8rem;
+        .hero__cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.8rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ff9662, #ffb25a);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 16px 30px rgba(255, 150, 98, 0.35);
+        }
+        main {
+            flex: 1;
+        }
+        .section {
+            padding: 0 1.5rem 4.5rem;
+        }
+        .section__inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            gap: 3rem;
+        }
+        .section__header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 28rem;
+        }
+        .section__header h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2e2116;
+        }
+        .section__header p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(46, 33, 22, 0.7);
         }
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
         }
         .menu-card {
-            border-radius: 14px;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid rgba(255, 172, 64, 0.2);
+            border-radius: 24px;
+            padding: 1.8rem 1.6rem;
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 18px 36px rgba(158, 112, 62, 0.12);
+            display: grid;
+            gap: 1rem;
+            border: 1px solid rgba(203, 150, 97, 0.18);
+            backdrop-filter: blur(6px);
         }
         .menu-card h3 {
-            margin: 0 0 0.5rem;
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
         }
         .menu-card p {
-            margin: 0 0 0.5rem;
-            font-size: 0.95rem;
+            margin: 0;
+            font-size: 0.97rem;
+            color: rgba(46, 33, 22, 0.75);
+        }
+        .menu-card .price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #a24c1a;
         }
         .menu-card button {
-            align-self: flex-start;
-            padding: 0.5rem 1rem;
+            justify-self: flex-start;
+            padding: 0.6rem 1.4rem;
             border-radius: 999px;
             border: none;
-            background: #ff9f43;
+            background: linear-gradient(135deg, #ff9662, #ffb25a);
             color: #fff;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
         .menu-card button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 18px rgba(255, 159, 67, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(255, 150, 98, 0.35);
+        }
+        .order-layout {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+            align-items: start;
+        }
+        form {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 0 28px 50px rgba(161, 93, 33, 0.14);
+            display: grid;
+            gap: 1.8rem;
+        }
+        form fieldset {
+            border: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 1.2rem;
+        }
+        form legend {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
         }
         form label {
             display: block;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.35rem;
             font-weight: 600;
+            font-size: 0.95rem;
         }
-        form input, form select {
+        form input,
+        form select {
             width: 100%;
-            padding: 0.6rem;
-            margin-bottom: 0.8rem;
-            border-radius: 10px;
-            border: 1px solid rgba(71, 53, 37, 0.2);
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(161, 93, 33, 0.22);
             background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        form input:focus,
+        form select:focus {
+            outline: none;
+            border-color: rgba(255, 150, 98, 0.6);
+            box-shadow: 0 0 0 4px rgba(255, 150, 98, 0.15);
         }
         .grid-two {
             display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.4rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .form-helper {
+            margin: 0 0 0.6rem;
+            font-size: 0.92rem;
+            color: rgba(46, 33, 22, 0.65);
+        }
+        .days,
+        #croissant-plan {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
         }
         .pill {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            margin: 0.15rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
             border-radius: 999px;
-            border: 1px solid rgba(71, 53, 37, 0.25);
+            border: 1px solid rgba(46, 33, 22, 0.18);
+            background: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.15s ease;
         }
         .pill.selected {
-            background: #ff9f43;
+            background: linear-gradient(135deg, #ff9662, #ffb25a);
             color: #fff;
-            border-color: #ff9f43;
+            border-color: transparent;
+            box-shadow: 0 10px 18px rgba(255, 150, 98, 0.25);
         }
-        .hidden {
-            display: none !important;
+        .primary-button {
+            padding: 0.85rem 1.8rem;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #ff9662, #ffb25a);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            justify-self: flex-start;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .stack {
+        .primary-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(255, 150, 98, 0.35);
+        }
+        .notice {
+            padding: 1rem 1.2rem;
+            border-radius: 18px;
+            background: rgba(30, 101, 74, 0.1);
+            color: #1e654a;
+            font-weight: 600;
+        }
+        #admin .notice {
+            background: rgba(247, 240, 231, 0.08);
+            color: #f7f0e7;
+        }
+        .order-aside {
             display: grid;
+            gap: 1.2rem;
+            padding: 1.8rem;
+            border-radius: 28px;
+            background: rgba(48, 36, 25, 0.85);
+            color: #fff8ef;
+            box-shadow: 0 24px 40px rgba(48, 36, 25, 0.3);
+            position: sticky;
+            top: 2rem;
+        }
+        .order-aside h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .order-aside ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.6rem;
+            font-size: 0.95rem;
+        }
+        .order-aside li::before {
+            content: "•";
+            margin-right: 0.5rem;
+            color: #ffb25a;
+        }
+        .order-aside .card-note {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffe5ca;
+        }
+        .info-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        .info-card {
+            padding: 1.6rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 16px 30px rgba(158, 112, 62, 0.14);
+            display: grid;
+            gap: 0.75rem;
+        }
+        .info-card h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .info-card p {
+            margin: 0;
+            font-size: 0.98rem;
+            color: rgba(46, 33, 22, 0.75);
+            line-height: 1.55;
+        }
+        /* Admin comment: The admin panel keeps the darker data grid similar to the source design. */
+        #admin {
+            padding: 4.5rem 1.5rem 5rem;
+            background: linear-gradient(180deg, #2d1e13 0%, #24170f 100%);
+            color: #f7f0e7;
+        }
+        #admin .section__inner {
+            gap: 2rem;
+        }
+        #admin h2 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
+        }
+        .toolbar button {
+            padding: 0.6rem 1.4rem;
+            border-radius: 999px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(247, 224, 206, 0.15);
+            color: #f7f0e7;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .toolbar button:hover {
+            background: rgba(247, 224, 206, 0.35);
+            transform: translateY(-1px);
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
         }
-        th, td {
-            padding: 0.6rem;
+        th,
+        td {
+            padding: 0.85rem 1rem;
             text-align: left;
-            border-bottom: 1px solid rgba(71, 53, 37, 0.1);
+            border-bottom: 1px solid rgba(247, 240, 231, 0.1);
         }
-        .toolbar {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        .notice {
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            background: rgba(74, 189, 172, 0.15);
-            color: #1f6f63;
+        th {
+            font-size: 0.95rem;
             font-weight: 600;
+            color: rgba(247, 240, 231, 0.85);
+        }
+        td button {
+            padding: 0.45rem 1rem;
+            border-radius: 999px;
+            border: none;
+            background: rgba(255, 150, 98, 0.25);
+            color: #fff;
+            cursor: pointer;
         }
         footer {
             text-align: center;
-            padding: 2rem 1rem;
-            color: rgba(71, 53, 37, 0.65);
+            padding: 3rem 1.5rem 4rem;
+            color: rgba(46, 33, 22, 0.6);
+            font-size: 0.95rem;
+        }
+        .hidden {
+            display: none !important;
+        }
+        @media (max-width: 960px) {
+            .hero {
+                padding-bottom: 4rem;
+            }
+            .order-layout {
+                grid-template-columns: 1fr;
+            }
+            .order-aside {
+                position: static;
+            }
         }
         @media (max-width: 640px) {
-            header h1 { font-size: 2rem; }
-            header p { font-size: 1rem; }
+            .hero__top {
+                align-items: flex-start;
+            }
+            .hero__nav {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .hero__contact {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .hero__headline h1 {
+                font-size: 2.2rem;
+            }
         }
     </style>
 </head>
 <body data-page="{{.Page}}">
-    <header>
-        <h1>Белая Ромашка — Свежая пекарня</h1>
-        <p>{{.FreeDelivery}}</p>
-    </header>
-    <main>
-        <!-- Section: Customer Order Experience -->
-        <section id="customer" class="stack">
-            <h2>Утренние заказы жителей</h2>
-            <div class="notice">{{.CroissantBlurb}}</div>
-            <div class="menu-grid" id="menu"></div>
-            <form id="order-form" autocomplete="on">
-                <div class="grid-two">
-                    <div>
-                        <label for="name">Имя</label>
-                        <input id="name" name="name" required>
-                        <label for="phone">Телефон</label>
-                        <input id="phone" name="phone" placeholder="8-XXX-XXX-XX-XX" required>
-                        <label for="address">Адрес</label>
-                        <input id="address" name="address" placeholder="Белая Ромашка, дом" required>
-                    </div>
-                    <div>
-                        <label>Дни доставки хлеба</label>
-                        <div id="bread-days" class="days"></div>
-                        <label for="bread-frequency">Частота</label>
-                        <select id="bread-frequency" name="breadFrequency" required>
-                            <option value="">Выберите</option>
-                            <option value="everyday">Каждый день</option>
-                            <option value="alternate">Через день</option>
-                            <option value="weekend">Выходные</option>
-                        </select>
-                        <label for="bread-start">Дата начала</label>
-                        <input id="bread-start" name="breadStart" type="date" required>
-                        <label for="bread-notes">Комментарий</label>
-                        <input id="bread-notes" name="breadNotes" placeholder="Например, нужна нарезка">
+    <div class="page">
+        <!-- Hero comment: This hero replicates the Masamadre hero ratio with warm tones and structured messaging. -->
+        <header class="hero">
+            <div class="hero__content">
+                <div class="hero__top">
+                    <div class="hero__logo">Белая Ромашка</div>
+                    <nav class="hero__nav">
+                        <a href="#menu">Меню</a>
+                        <a href="#order">Оформление</a>
+                        <a href="#info">Доставка</a>
+                    </nav>
+                    <div class="hero__contact">
+                        <span>☎ +7 (800) 500-55-35</span>
+                        <span class="hero__badge">{{.FreeDelivery}}</span>
                     </div>
                 </div>
-                <div>
-                    <label>Расписание круассанов</label>
-                    <div id="croissant-plan" class="days"></div>
+                <div class="hero__body">
+                    <div class="hero__headline">
+                        <div class="hero__badge">Доставка завтрака с любовью</div>
+                        <h1>Семейная пекарня Белая Ромашка</h1>
+                        <p>{{.CroissantBlurb}}</p>
+                        <a class="hero__cta" href="#order">Заполнить заявку</a>
+                    </div>
+                    <div class="hero__card">
+                        <h2>Каждое утро печём и везём</h2>
+                        <p>Закажете вечером — и свежие батоны, круассаны и хлеб приедут к вашему завтраку. Мы доставляем по району Белая Ромашка и точно помним каждую семью.</p>
+                        <div class="card-note">Доставка ранним утром, оплата после получения. Мы звоним накануне, чтобы подтвердить состав заказа.</div>
+                    </div>
                 </div>
-                <button type="submit">Оформить заказ</button>
-                <div id="order-message" class="notice hidden"></div>
-            </form>
-        </section>
-        <!-- Section: Admin Inventory Console -->
-        <section id="admin" class="stack">
-            <h2>Панель пекаря</h2>
-            <div class="toolbar">
-                <button id="refresh-inventory" type="button">Обновить наличие</button>
-                <button id="new-batch" type="button">Добавить партию</button>
             </div>
-            <div id="inventory-empty" class="notice hidden">Добавьте свежие изделия для отображения в меню</div>
-            <table id="inventory-table" class="hidden">
-                <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>Категория</th>
-                        <th>Готовность</th>
-                        <th>Цена</th>
-                        <th>Количество</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </section>
-    </main>
-    <footer>С любовью испечено в Пятигорске</footer>
-    <!-- Section: Inline Scripts keep SPA responsive without external files -->
+        </header>
+        <main>
+            <!-- Customer comment: Customer flow mirrors Masamadre with menu preview, order form, and service notes. -->
+            <section id="customer" class="section">
+                <div class="section__inner">
+                    <div class="section__header" id="menu">
+                        <h2>Выберите любимую выпечку</h2>
+                        <p>Добавляйте позиции в своё расписание. Мы собрали сезонные круассаны, хлеб на закваске и семейные пироги.</p>
+                    </div>
+                    <div class="menu-grid" id="menu-list"></div>
+                    <div id="order" class="order-layout">
+                        <form id="order-form" autocomplete="on">
+                            <fieldset>
+                                <legend>Контактные данные</legend>
+                                <div class="grid-two">
+                                    <div>
+                                        <label for="name">Имя</label>
+                                        <input id="name" name="name" required>
+                                    </div>
+                                    <div>
+                                        <label for="phone">Телефон</label>
+                                        <input id="phone" name="phone" placeholder="8-XXX-XXX-XX-XX" required>
+                                    </div>
+                                </div>
+                                <label for="address">Адрес</label>
+                                <input id="address" name="address" placeholder="Белая Ромашка, дом" required>
+                            </fieldset>
+                            <fieldset>
+                                <legend>План доставки хлеба</legend>
+                                <label>Дни недели</label>
+                                <div id="bread-days" class="days"></div>
+                                <div class="grid-two">
+                                    <div>
+                                        <label for="bread-frequency">Частота</label>
+                                        <select id="bread-frequency" name="breadFrequency" required>
+                                            <option value="">Выберите</option>
+                                            <option value="everyday">Каждый день</option>
+                                            <option value="alternate">Через день</option>
+                                            <option value="weekend">Выходные</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="bread-start">Дата начала</label>
+                                        <input id="bread-start" name="breadStart" type="date" required>
+                                    </div>
+                                </div>
+                                <label for="bread-notes">Комментарий</label>
+                                <input id="bread-notes" name="breadNotes" placeholder="Например, нужна нарезка">
+                            </fieldset>
+                            <fieldset>
+                                <legend>Круассаны и пироги</legend>
+                                <p class="form-helper">Нажмите на день, чтобы добавить количество для любимой выпечки.</p>
+                                <div id="croissant-plan" class="days"></div>
+                            </fieldset>
+                            <button class="primary-button" type="submit">Оформить заказ</button>
+                            <div id="order-message" class="notice hidden"></div>
+                        </form>
+                        <aside class="order-aside">
+                            <h3>Как всё проходит</h3>
+                            <ul>
+                                <li>Пекари подтверждают заказ вечером и уточняют детали.</li>
+                                <li>Доставляем с 6 до 8 утра, чтобы вы проснулись к свежему хлебу.</li>
+                                <li>Оплата наличными или переводом после получения заказа.</li>
+                                <li>Меню обновляем каждый день — смотрите сезонные новинки.</li>
+                            </ul>
+                            <div class="card-note">Если нужен подарок или особая диета — укажите это в комментариях, мы согласуем рецепт.</div>
+                        </aside>
+                    </div>
+                    <div class="section__header" id="info">
+                        <h2>Забота о каждом утре</h2>
+                        <p>Команда печёт ночью, чтобы на рассвете доставить ещё тёплые изделия. Всё приготовлено из локальных ингредиентов и натуральной закваски.</p>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h3>Маршрут Белая Ромашка</h3>
+                            <p>Ездим только по району, чтобы не опаздывать. Курьер оставляет пакет к вашему порогу или передаёт лично — как вам удобнее.</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>Только свежее тесто</h3>
+                            <p>Никакой заморозки. Мы заводим тесто вечером, выдерживаем на закваске и выпекаем партиями перед выездом.</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>Семейные подборки</h3>
+                            <p>Хотите набор для всей семьи или подарок соседям? Напишите в заявке, и мы соберём коробку по вкусу.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Admin comment: Admin layout stays functional while adopting the darker Masamadre management zone styling. -->
+            <section id="admin" class="hidden">
+                <div class="section__inner">
+                    <h2>Панель пекаря</h2>
+                    <div class="toolbar">
+                        <button id="refresh-inventory" type="button">Обновить наличие</button>
+                        <button id="new-batch" type="button">Добавить партию</button>
+                    </div>
+                    <div id="inventory-empty" class="notice hidden">Добавьте свежие изделия для отображения в меню</div>
+                    <table id="inventory-table" class="hidden">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Категория</th>
+                                <th>Готовность</th>
+                                <th>Цена</th>
+                                <th>Количество</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+        <footer>С любовью испечено в Пятигорске</footer>
+    </div>
+    <!-- Script comment: Inline script keeps SPA behavior identical while matching the Masamadre interaction pattern. -->
     <script>
     const pageKind = document.body.getAttribute('data-page');
     const state = {
@@ -251,7 +663,7 @@
     }
 
     function renderMenu() {
-        const container = $('menu');
+        const container = $('menu-list');
         container.innerHTML = '';
         state.menu.forEach(item => {
             const card = document.createElement('div');
@@ -259,7 +671,7 @@
             card.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
-                <p><strong>${item.price}</strong></p>
+                <p class="price">${item.price}</p>
                 <button type="button" data-name="${item.name}" data-category="${item.category}">Добавить</button>
             `;
             card.querySelector('button').addEventListener('click', () => addCroissantDay(item));
