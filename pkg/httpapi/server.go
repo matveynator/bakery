@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -28,19 +30,25 @@ type Server struct {
 	inventory *inventory.Service
 	page      *template.Template
 	heroMenu  []order.MenuItem
+	logger    *log.Logger
 }
 
 // New prepares the template once to respect the proverb "A little copying is better than a little dependency."
-func New(orderService *order.Service, inventoryService *inventory.Service) (*Server, error) {
+func New(orderService *order.Service, inventoryService *inventory.Service, logger *log.Logger) (*Server, error) {
 	tmpl, err := template.ParseFS(uiFS, "public_html/app.gohtml")
 	if err != nil {
 		return nil, err
+	}
+	if logger == nil {
+		// The API defaults to a standard logger so deployments always get feedback about requests.
+		logger = log.New(os.Stdout, "[bakery] ", log.LstdFlags)
 	}
 	return &Server{
 		orders:    orderService,
 		inventory: inventoryService,
 		page:      tmpl,
 		heroMenu:  defaultMenu(),
+		logger:    logger,
 	}, nil
 }
 
@@ -175,6 +183,7 @@ func (s *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 
 	var payload orderPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		s.logger.Printf("order creation failed: unable to decode payload: %v", err)
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -182,10 +191,12 @@ func (s *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 	schedule := make([]order.CroissantSchedule, 0, len(payload.CroissantSchedule))
 	for _, slot := range payload.CroissantSchedule {
 		if strings.TrimSpace(slot.Day) == "" {
+			s.logger.Printf("order creation rejected: missing day for croissant schedule")
 			http.Error(w, "day is required", http.StatusBadRequest)
 			return
 		}
 		if slot.Quantity <= 0 {
+			s.logger.Printf("order creation rejected: non-positive croissant quantity: %d", slot.Quantity)
 			http.Error(w, "quantity must be a positive number", http.StatusBadRequest)
 			return
 		}
@@ -199,10 +210,12 @@ func (s *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 	items := make([]order.OrderItem, 0, len(payload.Items))
 	for _, item := range payload.Items {
 		if strings.TrimSpace(item.Name) == "" {
+			s.logger.Printf("order creation rejected: item name missing")
 			http.Error(w, "item name is required", http.StatusBadRequest)
 			return
 		}
 		if item.Quantity <= 0 {
+			s.logger.Printf("order creation rejected: invalid quantity %d for %s", item.Quantity, item.Name)
 			http.Error(w, "item quantity must be positive", http.StatusBadRequest)
 			return
 		}
@@ -233,13 +246,16 @@ func (s *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 	stored, err := s.orders.Submit(ctx, request)
 	if err != nil {
 		if order.IsValidation(err) {
+			s.logger.Printf("order creation failed validation for %s at %s: %v", request.CustomerName, request.Address, err)
 			s.respondError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		s.logger.Printf("order creation failed for %s at %s: %v", request.CustomerName, request.Address, err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	s.logger.Printf("order stored for %s at %s with %d items", stored.CustomerName, stored.Address, len(stored.Items))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stored)
 }
@@ -251,9 +267,11 @@ func (s *Server) listOrders(w http.ResponseWriter, r *http.Request) {
 
 	orders, err := s.orders.List(ctx)
 	if err != nil {
+		s.logger.Printf("order listing failed: %v", err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.logger.Printf("order listing served with %d records", len(orders))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(orders)
 }
@@ -262,10 +280,12 @@ func (s *Server) listOrders(w http.ResponseWriter, r *http.Request) {
 func (s *Server) createInventory(w http.ResponseWriter, r *http.Request) {
 	var payload inventoryPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		s.logger.Printf("inventory creation failed: unable to decode payload: %v", err)
 		s.respondError(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 	if err := payload.Validate(); err != nil {
+		s.logger.Printf("inventory creation rejected: %v", err)
 		s.respondError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -281,9 +301,11 @@ func (s *Server) createInventory(w http.ResponseWriter, r *http.Request) {
 	}
 	stored, err := s.inventory.Add(ctx, item)
 	if err != nil {
+		s.logger.Printf("inventory creation failed for %s: %v", item.Name, err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.logger.Printf("inventory item %s recorded with %d units", stored.Name, stored.AvailableCount)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stored)
 }
@@ -292,14 +314,17 @@ func (s *Server) createInventory(w http.ResponseWriter, r *http.Request) {
 func (s *Server) updateInventory(w http.ResponseWriter, r *http.Request) {
 	var payload inventoryPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		s.logger.Printf("inventory update failed: unable to decode payload: %v", err)
 		s.respondError(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 	if payload.ID == 0 {
+		s.logger.Printf("inventory update rejected: missing id")
 		s.respondError(w, "id is required", http.StatusBadRequest)
 		return
 	}
 	if err := payload.Validate(); err != nil {
+		s.logger.Printf("inventory update rejected for id %d: %v", payload.ID, err)
 		s.respondError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -316,12 +341,15 @@ func (s *Server) updateInventory(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := s.inventory.Update(ctx, item); err != nil {
 		if errors.Is(err, inventory.ErrNotFound) {
+			s.logger.Printf("inventory update failed: item %d not found", payload.ID)
 			s.respondError(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		s.logger.Printf("inventory update failed for %d: %v", payload.ID, err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.logger.Printf("inventory item %d updated with %d units", payload.ID, payload.Quantity)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -329,11 +357,13 @@ func (s *Server) updateInventory(w http.ResponseWriter, r *http.Request) {
 func (s *Server) deleteInventory(w http.ResponseWriter, r *http.Request) {
 	rawID := r.URL.Query().Get("id")
 	if rawID == "" {
+		s.logger.Printf("inventory delete rejected: missing id")
 		s.respondError(w, "id is required", http.StatusBadRequest)
 		return
 	}
 	id, err := strconv.Atoi(rawID)
 	if err != nil {
+		s.logger.Printf("inventory delete rejected: invalid id %s", rawID)
 		s.respondError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
@@ -342,12 +372,15 @@ func (s *Server) deleteInventory(w http.ResponseWriter, r *http.Request) {
 
 	if err := s.inventory.Delete(ctx, int64(id)); err != nil {
 		if errors.Is(err, inventory.ErrNotFound) {
+			s.logger.Printf("inventory delete failed: item %d not found", id)
 			s.respondError(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		s.logger.Printf("inventory delete failed for %d: %v", id, err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.logger.Printf("inventory item %d deleted", id)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -358,9 +391,11 @@ func (s *Server) listInventory(w http.ResponseWriter, r *http.Request) {
 
 	items, err := s.inventory.List(ctx)
 	if err != nil {
+		s.logger.Printf("inventory listing failed: %v", err)
 		s.respondError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.logger.Printf("inventory listing served with %d records", len(items))
 	response := make([]inventoryResponse, 0, len(items))
 	for _, item := range items {
 		response = append(response, inventoryResponse{

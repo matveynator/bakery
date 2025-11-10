@@ -8,7 +8,7 @@ import (
 	"bakery/pkg/app"
 )
 
-// main acts as a thin adapter so existing process managers can keep using cmd/server.
+// main exposes a root-level entry point so operators can simply run `go run bakery.go`.
 func main() {
 	logger := log.New(os.Stdout, "[bakery] ", log.LstdFlags)
 	if err := app.Run(context.Background(), os.Args[1:], logger); err != nil {
