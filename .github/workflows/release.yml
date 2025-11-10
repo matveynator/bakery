@@ -1,0 +1,47 @@
+name: Cross-platform release
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  release:
+    if: contains(github.event.head_commit.message, 'stable release')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Build cross-platform binaries
+        run: scripts/build_release.sh dist
+
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: release-${{ github.sha }}
+          release_name: Bakery stable release ${{ github.sha }}
+          draft: false
+          prerelease: false
+
+      - name: Upload binaries
+        run: |
+          for file in dist/*; do
+            filename=$(basename "$file")
+            echo "Uploading $filename"
+            curl -sSL \
+              -X POST \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/octet-stream" \
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=${filename}" \
+              --data-binary "@${file}";
+          done
