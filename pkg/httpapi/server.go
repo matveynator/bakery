@@ -92,6 +92,8 @@ func (s *Server) pageHandler(page string) http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		// Logging page visits keeps the operator aware of customer and admin traffic without extra middleware.
+		s.logger.Printf("page %s served to %s", page, r.RemoteAddr)
 	})
 }
 
@@ -133,6 +135,8 @@ func (s *Server) menuEndpoint() http.Handler {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(menu)
+		// Surface a log for the menu feed so bakers can see when the storefront fetches updated listings.
+		s.logger.Printf("menu served with %d items to %s", len(menu), r.RemoteAddr)
 	})
 }
 

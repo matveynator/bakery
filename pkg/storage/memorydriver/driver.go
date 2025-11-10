@@ -84,7 +84,8 @@ func newStore(path string) (*store, error) {
 		return nil, err
 	}
 	s := &store{
-		commands:        make(chan storeCommand),
+		// A small buffer keeps bootstrap operations from blocking before the store goroutine spins up.
+		commands:        make(chan storeCommand, 32),
 		closed:          make(chan struct{}),
 		persistRequests: make(chan snapshot, 1),
 		snapshotPath:    path,
@@ -276,6 +277,10 @@ func (s *stmt) NumInput() int { return -1 }
 
 // Exec handles the mutation statements supported by the driver.
 func (s *stmt) Exec(args []driver.Value) (driver.Result, error) {
+	if s.query == "noop" {
+		// Schema bootstrap statements do not touch the in-memory store, so we short-circuit them.
+		return execResult{}, nil
+	}
 	reply := make(chan storeResult)
 	cmd := storeCommand{action: s.query, reply: reply}
 
@@ -327,16 +332,12 @@ func (s *stmt) Exec(args []driver.Value) (driver.Result, error) {
 			return nil, errors.New("expected id for delete")
 		}
 		cmd.id = toInt64(args[0])
-	case "noop":
-		reply <- storeResult{}
 	default:
 		return nil, fmt.Errorf("unsupported exec action %s", s.query)
 	}
 
-	if s.query != "noop" {
-		if err := s.enqueue(cmd); err != nil {
-			return nil, err
-		}
+	if err := s.enqueue(cmd); err != nil {
+		return nil, err
 	}
 
 	res := <-reply

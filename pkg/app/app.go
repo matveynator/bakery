@@ -13,7 +13,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"math/big"
 	"net/http"
@@ -120,7 +119,12 @@ func (c Config) address() string {
 // parseFlags uses a dedicated FlagSet so Run can be called from multiple entry points.
 func parseFlags(args []string) (Config, error) {
 	set := flag.NewFlagSet("bakery", flag.ContinueOnError)
-	set.SetOutput(io.Discard)
+	set.SetOutput(os.Stdout)
+	set.Usage = func() {
+		// We print the usage banner explicitly because operators expect feedback when exploring CLI options.
+		fmt.Fprintf(os.Stdout, "Usage of %s:\n", set.Name())
+		set.PrintDefaults()
+	}
 
 	var cfg Config
 	set.BoolVar(&cfg.showVersion, "version", false, "Show the application version")
