@@ -20,6 +20,6 @@ for os in ${OS_LIST}; do
       EXT=".exe"
     fi
     GOOS="${os}" GOARCH="${arch}" CGO_ENABLED=0 \
-      go build -ldflags="-s -w" -o "${OUTPUT_DIR}/${BIN_NAME}${EXT}" ./cmd/server
+      go build -ldflags="-s -w" -o "${OUTPUT_DIR}/${BIN_NAME}${EXT}" bakery.go
   done
 done

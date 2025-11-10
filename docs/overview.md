@@ -3,7 +3,7 @@
 This wiki page explains how the single-binary Go application serves both the customer storefront and the baker admin tools.
 
 ## Running Locally
-- `go run ./cmd/server` starts the HTTP server on port 8765 by default.
+- `go run bakery.go` starts the HTTP server on port 8765 by default.
 - Pass `-domain example.com` in production to enable automatic HTTPS bootstrapping.
 - The in-memory SQL driver persists data to `bakery.db` by default and requires no external services.
 
